@@ -1,4 +1,4 @@
-# lifehub
+# MyFinance
 
 A new Flutter project.
 
