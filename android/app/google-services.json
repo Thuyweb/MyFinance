@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "29911992388",
+    "project_id": "myfinance-8d2bf",
+    "storage_bucket": "myfinance-8d2bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29911992388:android:1310fafe030318b858d411",
+        "android_client_info": {
+          "package_name": "com.bav.myfinance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSYgk0x5Gay52HviZPzcvv0zzgHrxqgnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29911992388:android:5c77f3de48405c9d58d411",
+        "android_client_info": {
+          "package_name": "com.example.lifehub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSYgk0x5Gay52HviZPzcvv0zzgHrxqgnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
