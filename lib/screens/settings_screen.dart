@@ -1,0 +1,1621 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/providers.dart';
+import '../services/device_service.dart';
+import '../services/firestore_backup_service.dart';
+import '../services/otp_service.dart';
+import '../services/phone_input_service.dart';
+import '../services/recovery_code_service.dart';
+import '../services/services.dart';
+import '../utils/theme.dart';
+import '../l10n/localization_extension.dart';
+import 'pin_setup_screen.dart';
+import 'categories_management_screen.dart';
+import 'payment_method_management_screen.dart';
+import 'recovery_screen.dart';
+
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.tr('settings')),
+        foregroundColor: Colors.white,
+        elevation: 2,
+      ),
+      body: Consumer<UserSettingsProvider>(
+        builder: (context, userSettings, child) {
+          return ListView(
+            padding: const EdgeInsets.all(AppSizes.paddingMedium),
+            children: [
+              _buildSectionHeader(context.tr('app_preferences')),
+              _buildCurrencyTile(userSettings),
+              _buildLanguageTile(userSettings),
+              _buildThemeTile(userSettings),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('notifications')),
+              _buildNotificationTile(userSettings),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('security')),
+              _buildBiometricTile(userSettings),
+              _buildPinTile(userSettings),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('budget')),
+              _buildMonthlyBudgetTile(userSettings),
+              _buildBudgetAlertTile(userSettings),
+              if (userSettings.budgetAlertEnabled)
+                _buildBudgetPercentageTile(userSettings),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('categories')),
+              _buildCategoriesTile(),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('payment_methods')),
+              _buildPaymentMethodsTile(),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('data_management')),
+              _buildDataManagementCard(),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('backup_restore')),
+              _buildBackupRestoreCard(),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildSectionHeader(context.tr('about')),
+              _buildAboutTile(),
+              _buildVersionTile(),
+              const SizedBox(height: AppSizes.paddingLarge),
+              _buildResetTile(userSettings),
+              const SizedBox(height: AppSizes.paddingExtraLarge),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: AppSizes.paddingSmall,
+        bottom: AppSizes.paddingSmall,
+        top: AppSizes.paddingSmall,
+      ),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: AppTheme.primaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
+
+  // ================= BACKUP & RESTORE =================
+
+  Widget _buildBackupRestoreCard() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.cloud_sync, color: AppTheme.primaryColor, size: 24),
+                const SizedBox(width: 12),
+                Text(
+                  context.tr('backup_restore'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              context.tr('backup_restore_desc'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+            const SizedBox(height: 16),
+            _buildBackupRestoreAction(
+              icon: Icons.cloud_upload,
+              iconColor: Colors.green,
+              title: context.tr('backup_data'),
+              subtitle: context.tr('backup_data_desc'),
+              buttonText: context.tr('backup_now'),
+              buttonColor: Colors.green,
+              onPressed: _backupNow,
+            ),
+            const SizedBox(height: 12),
+            // 🔐 TILE MỚI – MÃ KHÔI PHỤC
+            _buildBackupRestoreAction(
+              icon: Icons.key,
+              iconColor: Colors.orange,
+              title: context.tr('recovery_code_info'),
+              subtitle: context.tr('recovery_code_info_desc'),
+              buttonText: context.tr('view_now'),
+              buttonColor: Colors.orange,
+              onPressed: _restoreRecoveryCodeByPhone,
+            ),
+            const SizedBox(height: 12),
+            _buildBackupRestoreAction(
+              icon: Icons.cloud_download,
+              iconColor: Colors.red,
+              title: context.tr('restore_data'),
+              subtitle: context.tr('restore_data_desc'),
+              buttonText: context.tr('restore_now'),
+              buttonColor: Colors.red,
+              onPressed: _confirmRestore,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackupRestoreAction({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required String buttonText,
+    required Color buttonColor,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: iconColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: iconColor.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: iconColor, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: iconColor,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[700],
+                  fontSize: 12,
+                ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: 16),
+              label: Text(buttonText, style: const TextStyle(fontSize: 13)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _askPhoneNumber() async {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('enter_phone')),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            hintText: context.tr('phone_hint'), // Ex: 901234567
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.tr('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: Text(context.tr('continue')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _restoreRecoveryCodeByPhone() async {
+    // 1️⃣ Nhập số điện thoại
+    final rawPhone = await _askPhoneNumber();
+    if (rawPhone == null || rawPhone.isEmpty) return;
+
+    // 2️⃣ Normalize + auto detect country
+    final phone = PhoneInputService.normalize(rawPhone);
+
+    if (!PhoneInputService.isValid(phone)) {
+      _showError(context.tr('phone_invalid'));
+      return;
+    }
+
+    final deviceId = await DeviceService.getDeviceId();
+
+    try {
+      // 3️⃣ Gửi OTP
+      await PhoneOtpService.instance.sendOtp(
+        phoneNumber: phone,
+        onCodeSent: (verificationId) async {
+          // 4️⃣ Nhập OTP
+          final inputOtp = await _askOtp();
+          if (inputOtp == null || inputOtp.isEmpty) return;
+
+          // 5️⃣ Verify OTP (ĐÚNG CHỮ KÝ)
+          final verified = await PhoneOtpService.instance.verifyOtp(
+            verificationId: verificationId,
+            smsCode: inputOtp,
+          );
+
+          if (!verified) {
+            _showError(context.tr('otp_invalid'));
+            return;
+          }
+
+          // 6️⃣ OTP OK → sinh recovery code
+          final newCode = RecoveryCodeService.instance.generateRecoveryCode();
+
+          await RecoveryCodeService.instance.saveRecoveryCode(
+            deviceId: deviceId,
+            recoveryCode: newCode,
+            phoneNumber: phone,
+          );
+
+          // 7️⃣ Hiện recovery code
+          _showRecoveryCodeDialog(newCode);
+        },
+        onError: (error) {
+          _showError(error);
+        },
+      );
+    } catch (e) {
+      _showError(context.tr('otp_send_failed'));
+    }
+  }
+
+  void _showRecoveryCodeDialog(String code) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.key, color: Colors.orange),
+            const SizedBox(width: 8),
+            Text(context.tr('recovery_code')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.tr('recovery_code_warning'),
+              style: const TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange),
+              ),
+              child: SelectableText(
+                code,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.tr('recovery_code_store_safe'),
+              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.tr('i_saved_it')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _askOtp() async {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('enter_otp')),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: context.tr('otp_hint'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.tr('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: Text(context.tr('verify')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.error,
+      ),
+    );
+  }
+
+  Widget _buildCurrencyTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: ListTile(
+        leading:
+            const Icon(Icons.currency_exchange, color: AppTheme.primaryColor),
+        title: Text(context.tr('currency')),
+        subtitle: Text(context.getCurrencyName(userSettings.currency)),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _showCurrencyDialog(userSettings),
+      ),
+    );
+  }
+
+  Widget _buildLanguageTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.language, color: AppTheme.primaryColor),
+        title: Text(context.tr('language')),
+        subtitle: Text(context.getLanguageName(userSettings.language)),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _showLanguageDialog(userSettings),
+      ),
+    );
+  }
+
+  Widget _buildThemeTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.palette, color: AppTheme.primaryColor),
+        title: Text(context.tr('theme')),
+        subtitle: Text(context.getThemeName(userSettings.theme)),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _showThemeDialog(userSettings),
+      ),
+    );
+  }
+
+  Widget _buildNotificationTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: SwitchListTile(
+        secondary:
+            const Icon(Icons.notifications, color: AppTheme.primaryColor),
+        title: Text(context.tr('daily_reminder')),
+        subtitle: Text(userSettings.notificationEnabled
+            ? context.tr('notification_enabled_desc')
+            : context.tr('notification_disabled_desc')),
+        value: userSettings.notificationEnabled,
+        activeColor: AppTheme.primaryColor,
+        onChanged: (value) => _updateNotification(userSettings, value),
+      ),
+    );
+  }
+
+  Widget _buildBiometricTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: SwitchListTile(
+        secondary: const Icon(Icons.fingerprint, color: AppTheme.primaryColor),
+        title: Text(context.tr('biometric_auth')),
+        subtitle: Text(userSettings.pinEnabled
+            ? context.tr('biometric_subtitle_enabled')
+            : context.tr('biometric_subtitle_disabled')),
+        value: userSettings.biometricEnabled,
+        activeColor: AppTheme.primaryColor,
+        onChanged: (value) => _updateBiometric(userSettings, value),
+      ),
+    );
+  }
+
+  Widget _buildPinTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.pin, color: AppTheme.primaryColor),
+        title: Text(context.tr('pin_security')),
+        subtitle: Text(userSettings.pinEnabled
+            ? context.tr('pin_subtitle_enabled')
+            : context.tr('pin_subtitle_disabled')),
+        trailing: userSettings.pinEnabled
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 20),
+                    onPressed: () => _setupPin(userSettings, isEdit: true),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                    onPressed: () => _removePinDialog(userSettings),
+                  ),
+                ],
+              )
+            : const Icon(Icons.chevron_right),
+        onTap: () => _setupPin(userSettings, isEdit: userSettings.pinEnabled),
+      ),
+    );
+  }
+
+  Widget _buildMonthlyBudgetTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.account_balance_wallet,
+            color: AppTheme.primaryColor),
+        title: Text(context.tr('monthly_budget')),
+        subtitle: Text(userSettings.monthlyBudgetLimit != null
+            ? userSettings.formatCurrency(userSettings.monthlyBudgetLimit!)
+            : context.tr('budget_not_set')),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _setMonthlyBudget(userSettings),
+      ),
+    );
+  }
+
+  Widget _buildBudgetAlertTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: SwitchListTile(
+        secondary: const Icon(Icons.warning, color: AppTheme.primaryColor),
+        title: Text(context.tr('budget_alert')),
+        subtitle: Text(context.tr('budget_alert_warning')),
+        value: userSettings.budgetAlertEnabled,
+        activeColor: AppTheme.primaryColor,
+        onChanged: (value) => _updateBudgetAlert(userSettings, value),
+      ),
+    );
+  }
+
+  Widget _buildBudgetPercentageTile(UserSettingsProvider userSettings) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.percent, color: AppTheme.primaryColor),
+        title: Text(context.tr('percentage_alert')),
+        subtitle: Text(context.tr('budget_percentage_desc',
+            params: {'percentage': '${userSettings.budgetAlertPercentage}'})),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _setBudgetPercentage(userSettings),
+      ),
+    );
+  }
+
+  Widget _buildCategoriesTile() {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.category, color: AppTheme.primaryColor),
+        title: Text(context.tr('manage_categories')),
+        subtitle: Text(context.tr('manage_categories_subtitle')),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _navigateToCategoriesManagement(),
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodsTile() {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.payment, color: AppTheme.primaryColor),
+        title: Text(context.tr('payment_methods')),
+        subtitle: Text(context.tr('manage_payment_methods_subtitle')),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _navigateToPaymentMethodsManagement(),
+      ),
+    );
+  }
+
+//================================= DATA MANAGEMENT===================
+  Widget _buildDataManagementCard() {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.folder_shared,
+                  color: AppTheme.primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  context.tr('manage_financial_data'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              context.tr('import_export_desc'),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+            const SizedBox(height: 16),
+            _buildDataActionSection(
+              icon: Icons.file_download,
+              iconColor: Colors.green,
+              title: context.tr('export_data'),
+              subtitle: context.tr('export_desc'),
+              buttonText: context.tr('export_now'),
+              buttonColor: Colors.green,
+              onPressed: () => _exportData(),
+            ),
+            const SizedBox(height: 16),
+            _buildDataActionSection(
+              icon: Icons.file_upload,
+              iconColor: Colors.blue,
+              title: context.tr('import_data'),
+              subtitle: context.tr('import_desc'),
+              buttonText: context.tr('choose_file'),
+              buttonColor: Colors.blue,
+              onPressed: () => _importData(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ================= BACKUP / RESTORE ACTION =================
+
+  Future<void> _backupNow() async {
+    try {
+      final deviceId = await DeviceService.getDeviceId();
+
+      // 1️⃣ BACKUP DATA TRƯỚC
+      await FirestoreBackupService.instance.backupAllData(deviceId);
+
+      // 2️⃣ KIỂM TRA ĐÃ CÓ RECOVERY CODE CHƯA
+      final hasCode =
+          await RecoveryCodeService.instance.hasRecoveryCode(deviceId);
+
+      if (!hasCode) {
+        // 👉 CHỈ HỎI SỐ ĐIỆN THOẠI LẦN ĐẦU
+        final phone = await _askPhoneNumber();
+        if (phone == null || phone.isEmpty) return;
+
+        final code = RecoveryCodeService.instance.generateRecoveryCode();
+
+        await RecoveryCodeService.instance.saveRecoveryCode(
+          deviceId: deviceId,
+          recoveryCode: code,
+          phoneNumber: phone,
+        );
+
+        if (!mounted) return;
+        _showRecoveryCodeDialog(code);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('backup_success')),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('backup_failed')),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  void _confirmRestore() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('restore_data')),
+        content: Text(context.tr('restore_warning')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.tr('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: Text(context.tr('continue')),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const RecoveryScreen(),
+      ),
+    );
+  }
+
+  Widget _buildDataActionSection({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required String buttonText,
+    required Color buttonColor,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: iconColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: iconColor.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: iconColor, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: iconColor,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[700],
+                  fontSize: 12,
+                ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: 16),
+              label: Text(
+                buttonText,
+                style: const TextStyle(fontSize: 13),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutTile() {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.info, color: AppTheme.primaryColor),
+        title: Text(context.tr('about_app')),
+        subtitle: Text(context.tr('app_info_desc')),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _showAboutDialog(),
+      ),
+    );
+  }
+
+  Widget _buildVersionTile() {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.tag, color: AppTheme.primaryColor),
+        title: Text(context.tr('app_version')),
+        subtitle: const Text('v1.0.0'),
+      ),
+    );
+  }
+
+  Widget _buildResetTile(UserSettingsProvider userSettings) {
+    return Card(
+      color: AppColors.error.withOpacity(0.1),
+      child: ListTile(
+        leading: const Icon(Icons.restore, color: AppColors.error),
+        title: Text(context.tr('reset_settings')),
+        subtitle: Text(context.tr('reset_settings_desc')),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _resetSettings(userSettings),
+      ),
+    );
+  }
+
+  String _getCurrencyName(String currency) {
+    switch (currency) {
+      case 'USD':
+        return context.tr('currency_usd');
+      case 'EUR':
+        return context.tr('currency_eur');
+      case 'SGD':
+        return context.tr('currency_sgd');
+      case 'VNĐ':
+        return context.tr('currency_vi');
+      default:
+        return context.tr('currency_vi');
+    }
+  }
+
+  String _getThemeName(String theme) {
+    switch (theme) {
+      case 'light':
+        return context.tr('theme_light');
+      case 'dark':
+        return context.tr('theme_dark');
+      case 'system':
+        return context.tr('theme_system');
+      default:
+        return theme;
+    }
+  }
+
+  void _showCurrencyDialog(UserSettingsProvider userSettings) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('select_currency')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: userSettings.getSupportedCurrencies().map((currency) {
+            return RadioListTile<String>(
+              title: Text(_getCurrencyName(currency)),
+              value: currency,
+              groupValue: userSettings.currency,
+              onChanged: (value) {
+                if (value != null) {
+                  userSettings.updateCurrency(value);
+                  Navigator.pop(context);
+                }
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageDialog(UserSettingsProvider userSettings) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('language')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: userSettings.getSupportedLanguages().map((language) {
+            return RadioListTile<String>(
+              title: Text(context.getLanguageName(language)),
+              value: language,
+              groupValue: userSettings.language,
+              onChanged: (value) {
+                if (value != null) {
+                  userSettings.updateLanguage(value);
+                  Navigator.pop(context);
+                }
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _showThemeDialog(UserSettingsProvider userSettings) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('select_theme')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: userSettings.getSupportedThemes().map((theme) {
+            return RadioListTile<String>(
+              title: Text(_getThemeName(theme)),
+              value: theme,
+              groupValue: userSettings.theme,
+              onChanged: (value) {
+                if (value != null) {
+                  userSettings.updateTheme(value);
+                  Navigator.pop(context);
+                }
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToCategoriesManagement() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CategoriesManagementScreen(),
+      ),
+    );
+  }
+
+  void _navigateToPaymentMethodsManagement() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PaymentMethodManagementScreen(),
+      ),
+    );
+  }
+
+  void _updateNotification(UserSettingsProvider userSettings, bool enabled) {
+    final time = enabled ? '20:00' : null;
+    userSettings.updateNotificationSettings(enabled: enabled, time: time);
+
+    if (enabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('notification_enabled_success')),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('notification_disabled_success')),
+          backgroundColor: AppColors.info,
+        ),
+      );
+    }
+  }
+
+  void _updateBiometric(UserSettingsProvider userSettings, bool enabled) async {
+    if (enabled) {
+      if (!userSettings.pinEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('setup_pin_first')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+
+        final pinResult = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (context) => const PinSetupScreen(isEdit: false),
+          ),
+        );
+
+        if (pinResult != true) {
+          return;
+        }
+
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      final isAvailable = await AuthService.instance.isBiometricAvailable();
+      if (!isAvailable) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('biometric_not_available')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      final authenticated =
+          await AuthService.instance.authenticateWithBiometric(
+        reason: context.tr('biometric_verification_reason'),
+      );
+
+      if (!authenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('biometric_auth_failed')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+    }
+
+    final success = await userSettings.updateBiometricEnabled(enabled);
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(enabled
+              ? context.tr('biometric_enabled_success')
+              : context.tr('biometric_disabled_success')),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
+  }
+
+  void _setupPin(UserSettingsProvider userSettings,
+      {bool isEdit = false}) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => PinSetupScreen(isEdit: isEdit),
+      ),
+    );
+
+    if (result == true) {}
+  }
+
+  void _removePinDialog(UserSettingsProvider userSettings) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('delete_pin')),
+        content: Text(userSettings.biometricEnabled
+            ? context.tr('confirm_delete_pin_with_biometric')
+            : context.tr('confirm_delete_pin_only')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.tr('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              if (userSettings.biometricEnabled) {
+                await userSettings.updateBiometricEnabled(false);
+              }
+
+              final success = await userSettings.updatePinSettings(
+                pinCode: null,
+                pinEnabled: false,
+              );
+
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(userSettings.biometricEnabled
+                        ? context.tr('pin_and_biometric_deleted')
+                        : context.tr('pin_deleted_successfully')),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: Text(context.tr('delete')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setMonthlyBudget(UserSettingsProvider userSettings) {
+    showDialog(
+      context: context,
+      builder: (context) => _MonthlyBudgetDialog(userSettings: userSettings),
+    );
+  }
+
+  void _updateBudgetAlert(UserSettingsProvider userSettings, bool enabled) {
+    userSettings.updateBudgetSettings(budgetAlertEnabled: enabled);
+  }
+
+  void _setBudgetPercentage(UserSettingsProvider userSettings) {
+    showDialog(
+      context: context,
+      builder: (context) => _BudgetPercentageDialog(userSettings: userSettings),
+    );
+  }
+
+  void _exportData() async {
+    try {
+      final shouldExport = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(context.tr('export_data_confirmation')),
+          content: Text(context.tr('export_data_message')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(context.tr('cancel')),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(context.tr('export')),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldExport != true) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text(context.tr('exporting_data')),
+            ],
+          ),
+        ),
+      );
+
+      final userSettings =
+          Provider.of<UserSettingsProvider>(context, listen: false);
+      final exportedFiles = await userSettings.exportDataToDownloads();
+
+      Navigator.pop(context); // Close loading dialog
+
+      if (exportedFiles.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('no_data_to_export')),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+        return;
+      }
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  context.tr('success_data_exported'),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(context.tr('success_data_exported') + ':'),
+              const SizedBox(height: 12),
+              ...exportedFiles.entries.map((entry) {
+                final filePath = entry.value;
+                final fileName = filePath.split('/').last;
+                final dirPath =
+                    filePath.substring(0, filePath.lastIndexOf('/'));
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('• $fileName',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        '  Path: $dirPath',
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        context.tr('csv_file_can_be_opened'),
+                        style: TextStyle(fontSize: 12, color: Colors.blue[700]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(context.tr('ok')),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      Navigator.pop(context); // Close loading dialog if still open
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              context.tr('error_message', params: {'error': e.toString()})),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  void _importData() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text(context.tr('analyzing_file')),
+            ],
+          ),
+        ),
+      );
+
+      final userSettings =
+          Provider.of<UserSettingsProvider>(context, listen: false);
+      final previewData = await userSettings.importDataWithFilePicker();
+
+      Navigator.pop(context); // Close loading dialog
+
+      if (previewData == null) {
+        return;
+      }
+
+      await _performConfirmedImport(previewData);
+    } catch (e) {
+      Navigator.pop(context); // Close loading dialog if still open
+
+      String errorMessage = e.toString();
+      if (errorMessage.contains('No file selected')) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              context.tr('error_message', params: {'error': errorMessage})),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _performConfirmedImport(Map<String, dynamic> previewData) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text(context.tr('importing_data')),
+            ],
+          ),
+        ),
+      );
+
+      final userSettings =
+          Provider.of<UserSettingsProvider>(context, listen: false);
+      final result = await userSettings.processConfirmedImport(
+        previewData['content'] as String,
+        previewData['filePath'] as String?,
+      );
+
+      Navigator.pop(context); // Close loading dialog
+
+      _showImportResultDialog(result);
+    } catch (e) {
+      Navigator.pop(context); // Close loading dialog if still open
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              context.tr('error_importing', params: {'error': e.toString()})),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  void _showImportResultDialog(Map<String, int> result) {
+    final total = result['total'] ?? 0;
+    final success = result['success'] ?? 0;
+    final failed = result['failed'] ?? 0;
+    final isSuccess = success > 0;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              color: isSuccess ? AppColors.success : AppColors.error,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isSuccess
+                  ? context.tr('import_successful')
+                  : context.tr('import_failed'),
+              style: TextStyle(
+                color: isSuccess ? AppColors.success : AppColors.error,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isSuccess
+                ? AppColors.success.withOpacity(0.05)
+                : AppColors.error.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSuccess
+                  ? AppColors.success.withOpacity(0.2)
+                  : AppColors.error.withOpacity(0.2),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.tr('import_results'),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildImportStatRow(
+                  '📋 ' + context.tr('total_data'), total.toString()),
+              _buildImportStatRow('✅ ' + context.tr('import_success_count'),
+                  success.toString(), AppColors.success),
+              _buildImportStatRow('❌ ' + context.tr('import_failed_count'),
+                  failed.toString(), failed > 0 ? AppColors.error : null),
+              if (failed > 0) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '⚠️ ' + context.tr('import_failed_reason'),
+                    style: TextStyle(fontSize: 11, color: Colors.orange[800]),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close, size: 16),
+            label: Text(context.tr('close_button')),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isSuccess ? AppColors.success : AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImportStatRow(String label, String value, [Color? valueColor]) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: valueColor?.withOpacity(0.1) ?? Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              value,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: valueColor ?? Colors.grey[700],
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: const [
+            Icon(
+              Icons.account_balance_wallet,
+              color: AppTheme.primaryColor,
+            ),
+            SizedBox(width: 8),
+            Text('My Finance'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.tr('about_app_desc'),
+              style: const TextStyle(height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Version: 1.0.0',
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '© 2025 TDGS',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.tr('close')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _resetSettings(UserSettingsProvider userSettings) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('reset_settings_dialog_title')),
+        content: Text(context.tr('reset_settings_confirmation')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.tr('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              userSettings.resetToDefault();
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.tr('settings_reset_success')),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: Text(context.tr('reset')),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Dialog for setting monthly budget
+class _MonthlyBudgetDialog extends StatefulWidget {
+  final UserSettingsProvider userSettings;
+
+  const _MonthlyBudgetDialog({required this.userSettings});
+
+  @override
+  State<_MonthlyBudgetDialog> createState() => _MonthlyBudgetDialogState();
+}
+
+class _MonthlyBudgetDialogState extends State<_MonthlyBudgetDialog> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.userSettings.monthlyBudgetLimit?.toString() ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.tr('monthly_budget_dialog_title')),
+      content: TextField(
+        controller: _controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: context.tr('budget_amount_label'),
+          hintText: context.tr('budget_amount_hint'),
+          prefixText: widget.userSettings.getCurrencySymbol() + ' ',
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.tr('cancel')),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final amount = double.tryParse(_controller.text);
+            if (amount != null && amount > 0) {
+              widget.userSettings
+                  .updateBudgetSettings(monthlyBudgetLimit: amount);
+              Navigator.pop(context);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.tr('enter_valid_amount')),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+          },
+          child: Text(context.tr('save')),
+        ),
+      ],
+    );
+  }
+}
+
+// Dialog for setting budget alert percentage
+class _BudgetPercentageDialog extends StatefulWidget {
+  final UserSettingsProvider userSettings;
+
+  const _BudgetPercentageDialog({required this.userSettings});
+
+  @override
+  State<_BudgetPercentageDialog> createState() =>
+      _BudgetPercentageDialogState();
+}
+
+class _BudgetPercentageDialogState extends State<_BudgetPercentageDialog> {
+  late int _selectedPercentage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPercentage = widget.userSettings.budgetAlertPercentage;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.tr('budget_percentage_dialog_title')),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [50, 70, 80, 90, 100].map((percentage) {
+          return RadioListTile<int>(
+            title: Text('$percentage%'),
+            value: percentage,
+            groupValue: _selectedPercentage,
+            onChanged: (value) {
+              setState(() {
+                _selectedPercentage = value!;
+              });
+            },
+          );
+        }).toList(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.tr('cancel')),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            widget.userSettings.updateBudgetSettings(
+              budgetAlertPercentage: _selectedPercentage,
+            );
+            Navigator.pop(context);
+          },
+          child: Text(context.tr('save')),
+        ),
+      ],
+    );
+  }
+}

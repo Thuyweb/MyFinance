@@ -1,0 +1,105 @@
+{
+  "project_info": {
+    "project_number": "29911992388",
+    "project_id": "myfinance-8d2bf",
+    "storage_bucket": "myfinance-8d2bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29911992388:android:1310fafe030318b858d411",
+        "android_client_info": {
+          "package_name": "com.bav.myfinance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "29911992388-7vc2gfsv95ealqq1ncb0tm5oevqa7fkq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bav.myfinance",
+            "certificate_hash": "781d00a74e3f8be99a115b12b71149424bba483c"
+          }
+        },
+        {
+          "client_id": "29911992388-hv93qfbf0dklvqha42l6a7c91pejtnf7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSYgk0x5Gay52HviZPzcvv0zzgHrxqgnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "29911992388-hv93qfbf0dklvqha42l6a7c91pejtnf7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29911992388:android:b7471e7de81e148f58d411",
+        "android_client_info": {
+          "package_name": "com.bav.myfinance.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "29911992388-hv93qfbf0dklvqha42l6a7c91pejtnf7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSYgk0x5Gay52HviZPzcvv0zzgHrxqgnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "29911992388-hv93qfbf0dklvqha42l6a7c91pejtnf7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29911992388:android:8771854ac01e898658d411",
+        "android_client_info": {
+          "package_name": "com.example.expense_tracker_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "29911992388-hv93qfbf0dklvqha42l6a7c91pejtnf7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSYgk0x5Gay52HviZPzcvv0zzgHrxqgnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "29911992388-hv93qfbf0dklvqha42l6a7c91pejtnf7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

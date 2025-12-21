@@ -1,0 +1,342 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:device_info_plus/device_info_plus.dart';
+
+class ImagePickerService {
+  static final ImagePicker _picker = ImagePicker();
+
+  static Future<File?> pickImage({
+    required ImageSource source,
+    int maxWidth = 1024,
+    int maxHeight = 1024,
+    int imageQuality = 85,
+  }) async {
+    try {
+      bool hasPermission = await _checkPermissions(source);
+      if (!hasPermission) {
+        if (kDebugMode) {
+          print('Permission denied for image picker');
+        }
+        return null;
+      }
+
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: maxWidth.toDouble(),
+        maxHeight: maxHeight.toDouble(),
+        imageQuality: imageQuality,
+        preferredCameraDevice: CameraDevice.rear,
+      );
+
+      if (image == null) return null;
+
+      final File savedFile = await _saveImageToAppDirectory(File(image.path));
+      return savedFile;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error picking image: $e');
+      }
+      return null;
+    }
+  }
+
+  static Future<bool> _checkPermissions(ImageSource source) async {
+    if (source == ImageSource.camera) {
+      PermissionStatus cameraStatus = await Permission.camera.status;
+      if (cameraStatus.isDenied) {
+        cameraStatus = await Permission.camera.request();
+      }
+      return cameraStatus.isGranted;
+    } else {
+      if (Platform.isAndroid) {
+        int androidVersion = await _getAndroidSdkVersion();
+
+        if (androidVersion >= 33) {
+          PermissionStatus photosStatus = await Permission.photos.status;
+          if (photosStatus.isDenied) {
+            photosStatus = await Permission.photos.request();
+          }
+          return photosStatus.isGranted;
+        } else {
+          PermissionStatus storageStatus = await Permission.storage.status;
+          if (storageStatus.isDenied) {
+            storageStatus = await Permission.storage.request();
+          }
+          return storageStatus.isGranted;
+        }
+      }
+      return true; // iOS handles permissions automatically
+    }
+  }
+
+  static Future<int> _getAndroidSdkVersion() async {
+    if (Platform.isAndroid) {
+      try {
+        DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        return androidInfo.version.sdkInt;
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error getting Android SDK version: $e');
+        }
+        return 29; // Fallback to older version
+      }
+    }
+    return 0;
+  }
+
+  static Future<File> _saveImageToAppDirectory(File imageFile) async {
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    final String receiptsDir = path.join(appDir.path, 'receipts');
+
+    final Directory receiptsDirectory = Directory(receiptsDir);
+    if (!await receiptsDirectory.exists()) {
+      await receiptsDirectory.create(recursive: true);
+    }
+
+    final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final String extension = path.extension(imageFile.path);
+    final String fileName = 'receipt_$timestamp$extension';
+    final String newPath = path.join(receiptsDir, fileName);
+
+    final File newFile = await imageFile.copy(newPath);
+
+    try {
+      await imageFile.delete();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Could not delete temporary file: $e');
+      }
+    }
+
+    return newFile;
+  }
+
+  static Future<bool> deleteImage(String imagePath) async {
+    try {
+      final File file = File(imagePath);
+      if (await file.exists()) {
+        await file.delete();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting image: $e');
+      }
+      return false;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getImageInfo(String imagePath) async {
+    try {
+      final File file = File(imagePath);
+      if (await file.exists()) {
+        final int bytes = await file.length();
+        return {
+          'path': imagePath,
+          'size': bytes,
+          'sizeFormatted': _formatBytes(bytes),
+          'exists': true,
+        };
+      }
+      return {'exists': false};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting image info: $e');
+      }
+      return null;
+    }
+  }
+
+  static String _formatBytes(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  static Future<ImageSource?> showImageSourceDialog(context) async {
+    return await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Choose photo source',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 20),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    title: const Text('Camera'),
+                    subtitle: const Text('Take a photo using the camera'),
+                    onTap: () => Navigator.of(context).pop(ImageSource.camera),
+                  ),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.photo_library,
+                        color: Colors.green,
+                      ),
+                    ),
+                    title: const Text('Gallery'),
+                    subtitle: const Text('Select a photo from the gallery'),
+                    onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static Future<void> showPermissionDeniedDialog(
+      BuildContext context, ImageSource source) async {
+    String title = source == ImageSource.camera
+        ? 'Camera permission required'
+        : 'Gallery permission required';
+
+    String message = source == ImageSource.camera
+        ? 'The application needs camera access to take photos. Please grant permission in the app settings.'
+        : 'The application needs gallery access to select photos. Please grant permission in the app settings.';
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Open settings'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<File?> pickImageWithContext({
+    required BuildContext context,
+    required ImageSource source,
+    int maxWidth = 1024,
+    int maxHeight = 1024,
+    int imageQuality = 85,
+  }) async {
+    try {
+      bool hasPermission = await _checkPermissions(source);
+      if (!hasPermission) {
+        await showPermissionDeniedDialog(context, source);
+        return null;
+      }
+
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: maxWidth.toDouble(),
+        maxHeight: maxHeight.toDouble(),
+        imageQuality: imageQuality,
+        preferredCameraDevice: CameraDevice.rear,
+      );
+
+      if (image == null) return null;
+
+      final File savedFile = await _saveImageToAppDirectory(File(image.path));
+      return savedFile;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error picking image: $e');
+      }
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('An error occurred while taking the picture.: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+      return null;
+    }
+  }
+
+  static Future<File?> showImageSourceDialogAndPick(
+      BuildContext context) async {
+    final ImageSource? source = await showImageSourceDialog(context);
+    if (source == null) return null;
+
+    return await pickImageWithContext(context: context, source: source);
+  }
+}
