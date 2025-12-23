@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Cases Report - Flutter Finance App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    
+    header {
+      border-bottom: 3px solid #2196F3;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+    }
+    
+    h1 {
+      color: #2196F3;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 30px 0;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-card.total {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .stat-card.high {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .stat-card.medium {
+      background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+    }
+    
+    .stat-card.low {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      color: #333;
+    }
+    
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      color: #2196F3;
+      margin: 30px 0 15px 0;
+      font-weight: 600;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    th {
+      background: #2196F3;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    tr:hover {
+      background: #f9f9f9;
+    }
+    
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+    
+    .priority {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    
+    .priority-high {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .priority-medium {
+      background: #fff3e0;
+      color: #e65100;
+    }
+    
+    .priority-low {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .type-stats, .file-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .type-item, .file-item {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+      border-left: 4px solid #2196F3;
+    }
+    
+    .type-item strong, .file-item strong {
+      display: block;
+      color: #2196F3;
+      margin-bottom: 5px;
+    }
+    
+    .type-item span, .file-item span {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 Test Cases Report</h1>
+      <p class="subtitle">Flutter Finance App - Unit Tests Overview</p>
+    </header>
+    
+    <section>
+      <h2 class="section-title">📈 Tổng Quan</h2>
+      <div class="stats">
+        <div class="stat-card total">
+          <div class="stat-number">135</div>
+          <div class="stat-label">Total Test Cases</div>
+        </div>
+        <div class="stat-card high">
+          <div class="stat-number">62</div>
+          <div class="stat-label">High Priority</div>
+        </div>
+        <div class="stat-card medium">
+          <div class="stat-number">61</div>
+          <div class="stat-label">Medium Priority</div>
+        </div>
+        <div class="stat-card low">
+          <div class="stat-number">12</div>
+          <div class="stat-label">Low Priority</div>
+        </div>
+      </div>
+    </section>
+    
+    <section>
+      <h2 class="section-title">🧪 Thống Kê Test Type</h2>
+      <div class="type-stats">
+        <div class="type-item"><strong>Calculation</strong><span>2</span></div><div class="type-item"><strong>State</strong><span>4</span></div><div class="type-item"><strong>Serialization</strong><span>22</span></div><div class="type-item"><strong>Initialization</strong><span>8</span></div><div class="type-item"><strong>Functionality</strong><span>21</span></div><div class="type-item"><strong>Edge Case</strong><span>3</span></div><div class="type-item"><strong>Data</strong><span>37</span></div><div class="type-item"><strong>Validation</strong><span>7</span></div><div class="type-item"><strong>Integration</strong><span>31</span></div>
+      </div>
+    </section>
+    
+    <section>
+      <h2 class="section-title">📁 Thống Kê File</h2>
+      <div class="file-stats">
+        <div class="file-item"><strong>budget_model_test.dart</strong><span>21</span></div><div class="file-item"><strong>category_model_test.dart</strong><span>12</span></div><div class="file-item"><strong>expense_model_test.dart</strong><span>10</span></div><div class="file-item"><strong>income_model_test.dart</strong><span>12</span></div><div class="file-item"><strong>payment_method_model_test.dart</strong><span>14</span></div><div class="file-item"><strong>transaction_model_test.dart</strong><span>15</span></div><div class="file-item"><strong>user_model_test.dart</strong><span>20</span></div><div class="file-item"><strong>app_test.dart</strong><span>9</span></div><div class="file-item"><strong>budget_test.dart</strong><span>6</span></div><div class="file-item"><strong>category_test.dart</strong><span>5</span></div><div class="file-item"><strong>expense_test.dart</strong><span>7</span></div><div class="file-item"><strong>income_test.dart</strong><span>4</span></div>
+      </div>
+    </section>
+    
+    <section>
+      <h2 class="section-title">📋 Chi Tiết Test Cases</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>File</th>
+            <th>Test Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+              <tr>
+      <td>1</td>
+      <td>budget_model_test.dart</td>
+      <td>Tính usagePercentage đúng</td>
+      <td>Kiểm tra tính toán phần trăm sử dụng budget</td>
+      <td>Calculation</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>2</td>
+      <td>budget_model_test.dart</td>
+      <td>Tính remaining đúng</td>
+      <td>Kiểm tra tính toán số tiền còn lại</td>
+      <td>Calculation</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>3</td>
+      <td>budget_model_test.dart</td>
+      <td>Status đúng theo mức sử dụng</td>
+      <td>Kiểm tra status budget (normal/warning/exceeded/full)</td>
+      <td>State</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>4</td>
+      <td>budget_model_test.dart</td>
+      <td>toJson và fromJson hoạt động đúng</td>
+      <td>Kiểm tra serialization JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>5</td>
+      <td>budget_model_test.dart</td>
+      <td>Khởi tạo với giá trị mặc định</td>
+      <td>Kiểm tra các giá trị mặc định khi khởi tạo</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>6</td>
+      <td>budget_model_test.dart</td>
+      <td>remaining âm khi spent > amount</td>
+      <td>Kiểm tra remaining có thể âm</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>7</td>
+      <td>budget_model_test.dart</td>
+      <td>copyWith cập nhật các trường</td>
+      <td>Kiểm tra hàm copyWith</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>8</td>
+      <td>budget_model_test.dart</td>
+      <td>Chia cho 0 không gây lỗi</td>
+      <td>Kiểm tra xử lý exception khi amount=0</td>
+      <td>Edge Case</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>9</td>
+      <td>budget_model_test.dart</td>
+      <td>Status exceeded khi spent > amount</td>
+      <td>Kiểm tra status khi vượt ngân sách</td>
+      <td>State</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>10</td>
+      <td>budget_model_test.dart</td>
+      <td>Status full khi spent == amount</td>
+      <td>Kiểm tra status khi đầy ngân sách</td>
+      <td>State</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>11</td>
+      <td>budget_model_test.dart</td>
+      <td>fromJson từ dữ liệu hợp lệ</td>
+      <td>Kiểm tra deserialization từ JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>12</td>
+      <td>budget_model_test.dart</td>
+      <td>toJson chứa tất cả trường cần thiết</td>
+      <td>Kiểm tra JSON có tất cả trường</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>13</td>
+      <td>budget_model_test.dart</td>
+      <td>usagePercentage = 0 khi spent = 0</td>
+      <td>Kiểm tra trường hợp không có chi tiêu</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>14</td>
+      <td>budget_model_test.dart</td>
+      <td>usagePercentage = 100 khi spent = amount</td>
+      <td>Kiểm tra trường hợp sử dụng hết</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>15</td>
+      <td>budget_model_test.dart</td>
+      <td>remaining = 0 khi spent = amount</td>
+      <td>Kiểm tra số tiền còn lại bằng 0</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>16</td>
+      <td>budget_model_test.dart</td>
+      <td>Tên budget được lưu đúng</td>
+      <td>Kiểm tra trường name</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>17</td>
+      <td>budget_model_test.dart</td>
+      <td>Hạn mức budget được lưu đúng</td>
+      <td>Kiểm tra trường amount</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>18</td>
+      <td>budget_model_test.dart</td>
+      <td>Tiền chi tiêu được lưu đúng</td>
+      <td>Kiểm tra trường spent</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>19</td>
+      <td>budget_model_test.dart</td>
+      <td>Category ID được lưu đúng</td>
+      <td>Kiểm tra trường categoryId</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>20</td>
+      <td>budget_model_test.dart</td>
+      <td>JSON round-trip preserves data</td>
+      <td>Kiểm tra toJson -> fromJson giữ nguyên dữ liệu</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>21</td>
+      <td>budget_model_test.dart</td>
+      <td>equals và hashCode hoạt động</td>
+      <td>Kiểm tra so sánh và hash</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>22</td>
+      <td>category_model_test.dart</td>
+      <td>CategoryType.expense được lưu đúng</td>
+      <td>Kiểm tra category type expense</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>23</td>
+      <td>category_model_test.dart</td>
+      <td>CategoryType.income được lưu đúng</td>
+      <td>Kiểm tra category type income</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>24</td>
+      <td>category_model_test.dart</td>
+      <td>Tên category được lưu đúng</td>
+      <td>Kiểm tra trường name</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>25</td>
+      <td>category_model_test.dart</td>
+      <td>Icon được lưu đúng</td>
+      <td>Kiểm tra trường icon</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>26</td>
+      <td>category_model_test.dart</td>
+      <td>Màu sắc được lưu đúng</td>
+      <td>Kiểm tra trường color</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>27</td>
+      <td>category_model_test.dart</td>
+      <td>toJson serialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi sang JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>28</td>
+      <td>category_model_test.dart</td>
+      <td>fromJson deserialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi từ JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>29</td>
+      <td>category_model_test.dart</td>
+      <td>copyWith cập nhật đúng</td>
+      <td>Kiểm tra hàm copyWith</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>30</td>
+      <td>category_model_test.dart</td>
+      <td>Validate type không rỗng</td>
+      <td>Kiểm tra validation type</td>
+      <td>Validation</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>31</td>
+      <td>category_model_test.dart</td>
+      <td>Validate name không rỗng</td>
+      <td>Kiểm tra validation name</td>
+      <td>Validation</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>32</td>
+      <td>category_model_test.dart</td>
+      <td>JSON round-trip preserves data</td>
+      <td>Kiểm tra toJson -> fromJson giữ nguyên dữ liệu</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>33</td>
+      <td>category_model_test.dart</td>
+      <td>Category with default values</td>
+      <td>Kiểm tra category với giá trị mặc định</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>34</td>
+      <td>expense_model_test.dart</td>
+      <td>Chi tiêu được tạo với giá trị hợp lệ</td>
+      <td>Kiểm tra khởi tạo expense</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>35</td>
+      <td>expense_model_test.dart</td>
+      <td>Payment method được lưu đúng</td>
+      <td>Kiểm tra trường paymentMethod</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>36</td>
+      <td>expense_model_test.dart</td>
+      <td>Ghi chú được lưu đúng</td>
+      <td>Kiểm tra trường notes</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>37</td>
+      <td>expense_model_test.dart</td>
+      <td>Receipt photo được lưu đúng</td>
+      <td>Kiểm tra trường receiptPhoto</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>38</td>
+      <td>expense_model_test.dart</td>
+      <td>toJson serialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi sang JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>39</td>
+      <td>expense_model_test.dart</td>
+      <td>fromJson deserialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi từ JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>40</td>
+      <td>expense_model_test.dart</td>
+      <td>copyWith cập nhật đúng</td>
+      <td>Kiểm tra hàm copyWith</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>41</td>
+      <td>expense_model_test.dart</td>
+      <td>Recurring expense được lưu đúng</td>
+      <td>Kiểm tra trường isRecurring</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>42</td>
+      <td>expense_model_test.dart</td>
+      <td>JSON round-trip preserves data</td>
+      <td>Kiểm tra toJson -> fromJson giữ nguyên dữ liệu</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>43</td>
+      <td>expense_model_test.dart</td>
+      <td>Validate payment method</td>
+      <td>Kiểm tra validation payment method</td>
+      <td>Validation</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>44</td>
+      <td>income_model_test.dart</td>
+      <td>Thu nhập được tạo với giá trị hợp lệ</td>
+      <td>Kiểm tra khởi tạo income</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>45</td>
+      <td>income_model_test.dart</td>
+      <td>Nguồn thu nhập được lưu đúng</td>
+      <td>Kiểm tra trường source</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>46</td>
+      <td>income_model_test.dart</td>
+      <td>Ghi chú được lưu đúng</td>
+      <td>Kiểm tra trường notes</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>47</td>
+      <td>income_model_test.dart</td>
+      <td>Attachment được lưu đúng</td>
+      <td>Kiểm tra trường attachments</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>48</td>
+      <td>income_model_test.dart</td>
+      <td>toJson serialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi sang JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>49</td>
+      <td>income_model_test.dart</td>
+      <td>fromJson deserialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi từ JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>50</td>
+      <td>income_model_test.dart</td>
+      <td>copyWith cập nhật đúng</td>
+      <td>Kiểm tra hàm copyWith</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>51</td>
+      <td>income_model_test.dart</td>
+      <td>Recurring income được lưu đúng</td>
+      <td>Kiểm tra trường isRecurring</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>52</td>
+      <td>income_model_test.dart</td>
+      <td>JSON round-trip preserves data</td>
+      <td>Kiểm tra toJson -> fromJson giữ nguyên dữ liệu</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>53</td>
+      <td>income_model_test.dart</td>
+      <td>Validate income source</td>
+      <td>Kiểm tra validation source</td>
+      <td>Validation</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>54</td>
+      <td>income_model_test.dart</td>
+      <td>Validate income amount</td>
+      <td>Kiểm tra validation amount</td>
+      <td>Validation</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>55</td>
+      <td>income_model_test.dart</td>
+      <td>Income with recurring schedule</td>
+      <td>Kiểm tra income với lịch tái diễn</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>56</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Payment method được tạo đúng</td>
+      <td>Kiểm tra khởi tạo payment method</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>57</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Tên payment method được lưu đúng</td>
+      <td>Kiểm tra trường name</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>58</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Icon được lưu đúng</td>
+      <td>Kiểm tra trường icon</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>59</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Màu sắc được lưu đúng</td>
+      <td>Kiểm tra trường color</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>60</td>
+      <td>payment_method_model_test.dart</td>
+      <td>toJson serialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi sang JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>61</td>
+      <td>payment_method_model_test.dart</td>
+      <td>fromJson deserialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi từ JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>62</td>
+      <td>payment_method_model_test.dart</td>
+      <td>copyWith cập nhật đúng</td>
+      <td>Kiểm tra hàm copyWith</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>63</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Icon getter hoạt động</td>
+      <td>Kiểm tra lấy icon</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>64</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Color getter hoạt động</td>
+      <td>Kiểm tra lấy màu</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>65</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Built-in payment methods</td>
+      <td>Kiểm tra các payment method có sẵn</td>
+      <td>State</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>66</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Custom payment method</td>
+      <td>Kiểm tra custom payment method</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>67</td>
+      <td>payment_method_model_test.dart</td>
+      <td>JSON round-trip preserves data</td>
+      <td>Kiểm tra toJson -> fromJson giữ nguyên dữ liệu</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>68</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Icon type support</td>
+      <td>Kiểm tra các loại icon được hỗ trợ</td>
+      <td>Edge Case</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>69</td>
+      <td>payment_method_model_test.dart</td>
+      <td>Payment method equality</td>
+      <td>Kiểm tra so sánh payment method</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>70</td>
+      <td>transaction_model_test.dart</td>
+      <td>Giao dịch chi tiêu được tạo đúng</td>
+      <td>Kiểm tra khởi tạo expense transaction</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>71</td>
+      <td>transaction_model_test.dart</td>
+      <td>Giao dịch thu nhập được tạo đúng</td>
+      <td>Kiểm tra khởi tạo income transaction</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>72</td>
+      <td>transaction_model_test.dart</td>
+      <td>Loại giao dịch được lưu đúng</td>
+      <td>Kiểm tra trường type</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>73</td>
+      <td>transaction_model_test.dart</td>
+      <td>isIncome getter hoạt động</td>
+      <td>Kiểm tra getter isIncome</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>74</td>
+      <td>transaction_model_test.dart</td>
+      <td>isExpense getter hoạt động</td>
+      <td>Kiểm tra getter isExpense</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>75</td>
+      <td>transaction_model_test.dart</td>
+      <td>toJson serialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi sang JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>76</td>
+      <td>transaction_model_test.dart</td>
+      <td>fromJson deserialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi từ JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>77</td>
+      <td>transaction_model_test.dart</td>
+      <td>copyWith cập nhật đúng</td>
+      <td>Kiểm tra hàm copyWith</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>78</td>
+      <td>transaction_model_test.dart</td>
+      <td>Vị trí được lưu đúng</td>
+      <td>Kiểm tra trường location</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>79</td>
+      <td>transaction_model_test.dart</td>
+      <td>Attachment được lưu đúng</td>
+      <td>Kiểm tra trường attachments</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>80</td>
+      <td>transaction_model_test.dart</td>
+      <td>JSON round-trip preserves data</td>
+      <td>Kiểm tra toJson -> fromJson giữ nguyên dữ liệu</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>81</td>
+      <td>transaction_model_test.dart</td>
+      <td>Complete transaction object</td>
+      <td>Kiểm tra giao dịch đầy đủ</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>82</td>
+      <td>transaction_model_test.dart</td>
+      <td>Transaction equality</td>
+      <td>Kiểm tra so sánh giao dịch</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>83</td>
+      <td>transaction_model_test.dart</td>
+      <td>Validate transaction type</td>
+      <td>Kiểm tra validation type</td>
+      <td>Validation</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>84</td>
+      <td>transaction_model_test.dart</td>
+      <td>Transaction with multiple attachments</td>
+      <td>Kiểm tra giao dịch với nhiều attachment</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>85</td>
+      <td>user_model_test.dart</td>
+      <td>User được tạo đúng</td>
+      <td>Kiểm tra khởi tạo user</td>
+      <td>Initialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>86</td>
+      <td>user_model_test.dart</td>
+      <td>Tên user được lưu đúng</td>
+      <td>Kiểm tra trường name</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>87</td>
+      <td>user_model_test.dart</td>
+      <td>Email được lưu đúng</td>
+      <td>Kiểm tra trường email</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>88</td>
+      <td>user_model_test.dart</td>
+      <td>Theme setting được lưu đúng</td>
+      <td>Kiểm tra cài đặt theme</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>89</td>
+      <td>user_model_test.dart</td>
+      <td>Language setting được lưu đúng</td>
+      <td>Kiểm tra cài đặt ngôn ngữ</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>90</td>
+      <td>user_model_test.dart</td>
+      <td>Backup setting được lưu đúng</td>
+      <td>Kiểm tra cài đặt backup</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>91</td>
+      <td>user_model_test.dart</td>
+      <td>Notification setting được lưu đúng</td>
+      <td>Kiểm tra cài đặt thông báo</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>92</td>
+      <td>user_model_test.dart</td>
+      <td>Biometric setting được lưu đúng</td>
+      <td>Kiểm tra cài đặt biometric</td>
+      <td>Data</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>93</td>
+      <td>user_model_test.dart</td>
+      <td>PIN setting được lưu đúng</td>
+      <td>Kiểm tra cài đặt PIN</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>94</td>
+      <td>user_model_test.dart</td>
+      <td>toJson serialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi sang JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>95</td>
+      <td>user_model_test.dart</td>
+      <td>fromJson deserialization hoạt động</td>
+      <td>Kiểm tra chuyển đổi từ JSON</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>96</td>
+      <td>user_model_test.dart</td>
+      <td>copyWith cập nhật đúng</td>
+      <td>Kiểm tra hàm copyWith</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>97</td>
+      <td>user_model_test.dart</td>
+      <td>Recovery code được lưu đúng</td>
+      <td>Kiểm tra trường recoveryCode</td>
+      <td>Data</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>98</td>
+      <td>user_model_test.dart</td>
+      <td>Last backup date được lưu đúng</td>
+      <td>Kiểm tra trường lastBackupDate</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>99</td>
+      <td>user_model_test.dart</td>
+      <td>JSON round-trip preserves data</td>
+      <td>Kiểm tra toJson -> fromJson giữ nguyên dữ liệu</td>
+      <td>Serialization</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>100</td>
+      <td>user_model_test.dart</td>
+      <td>Nullable dates handled correctly</td>
+      <td>Kiểm tra xử lý date nullable</td>
+      <td>Edge Case</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>101</td>
+      <td>user_model_test.dart</td>
+      <td>Validate user email format</td>
+      <td>Kiểm tra validation email format</td>
+      <td>Validation</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>102</td>
+      <td>user_model_test.dart</td>
+      <td>Settings update correctly</td>
+      <td>Kiểm tra cập nhật settings</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>103</td>
+      <td>user_model_test.dart</td>
+      <td>User with all settings enabled</td>
+      <td>Kiểm tra user với tất cả settings bật</td>
+      <td>Data</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>104</td>
+      <td>user_model_test.dart</td>
+      <td>User preferences persistence</td>
+      <td>Kiểm tra lưu preferences user</td>
+      <td>Functionality</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>105</td>
+      <td>app_test.dart</td>
+      <td>App starts successfully</td>
+      <td>Kiểm tra app khởi động thành công</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>106</td>
+      <td>app_test.dart</td>
+      <td>Dashboard navigates to category screen</td>
+      <td>Kiểm tra điều hướng từ Dashboard sang Category</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>107</td>
+      <td>app_test.dart</td>
+      <td>Category navigates back to dashboard</td>
+      <td>Kiểm tra quay lại Dashboard từ Category</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>108</td>
+      <td>app_test.dart</td>
+      <td>Dashboard navigates to settings screen</td>
+      <td>Kiểm tra điều hướng từ Dashboard sang Settings</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>109</td>
+      <td>app_test.dart</td>
+      <td>Settings shows app version</td>
+      <td>Kiểm tra hiển thị phiên bản app trong Settings</td>
+      <td>Integration</td>
+      <td><span class="priority priority-low">Low</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>110</td>
+      <td>app_test.dart</td>
+      <td>Date picker opens on dashboard</td>
+      <td>Kiểm tra mở date picker trên Dashboard</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>111</td>
+      <td>app_test.dart</td>
+      <td>Logout button removes user session</td>
+      <td>Kiểm tra logout xóa session người dùng</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>112</td>
+      <td>app_test.dart</td>
+      <td>Search functionality filters results</td>
+      <td>Kiểm tra tính năng tìm kiếm lọc kết quả</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>113</td>
+      <td>app_test.dart</td>
+      <td>Back button navigates properly</td>
+      <td>Kiểm tra nút back điều hướng chính xác</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>114</td>
+      <td>budget_test.dart</td>
+      <td>Create new budget flow</td>
+      <td>Kiểm tra flow tạo budget mới</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>115</td>
+      <td>budget_test.dart</td>
+      <td>View budget details</td>
+      <td>Kiểm tra xem chi tiết budget</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>116</td>
+      <td>budget_test.dart</td>
+      <td>Edit existing budget</td>
+      <td>Kiểm tra chỉnh sửa budget hiện có</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>117</td>
+      <td>budget_test.dart</td>
+      <td>Delete budget from list</td>
+      <td>Kiểm tra xóa budget khỏi danh sách</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>118</td>
+      <td>budget_test.dart</td>
+      <td>Budget status updates correctly</td>
+      <td>Kiểm tra cập nhật status budget</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>119</td>
+      <td>budget_test.dart</td>
+      <td>Multiple budgets display correctly</td>
+      <td>Kiểm tra hiển thị nhiều budget</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>120</td>
+      <td>category_test.dart</td>
+      <td>Add new category</td>
+      <td>Kiểm tra thêm category mới</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>121</td>
+      <td>category_test.dart</td>
+      <td>View all categories</td>
+      <td>Kiểm tra xem tất cả categories</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>122</td>
+      <td>category_test.dart</td>
+      <td>Edit category details</td>
+      <td>Kiểm tra chỉnh sửa chi tiết category</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>123</td>
+      <td>category_test.dart</td>
+      <td>Delete category</td>
+      <td>Kiểm tra xóa category</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>124</td>
+      <td>category_test.dart</td>
+      <td>Use category in transaction</td>
+      <td>Kiểm tra sử dụng category trong giao dịch</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>125</td>
+      <td>expense_test.dart</td>
+      <td>Add new expense</td>
+      <td>Kiểm tra thêm chi tiêu mới</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>126</td>
+      <td>expense_test.dart</td>
+      <td>View expense list</td>
+      <td>Kiểm tra xem danh sách chi tiêu</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>127</td>
+      <td>expense_test.dart</td>
+      <td>Filter expenses by category</td>
+      <td>Kiểm tra lọc chi tiêu theo category</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>128</td>
+      <td>expense_test.dart</td>
+      <td>Edit expense details</td>
+      <td>Kiểm tra chỉnh sửa chi tiêu</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>129</td>
+      <td>expense_test.dart</td>
+      <td>Delete expense</td>
+      <td>Kiểm tra xóa chi tiêu</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>130</td>
+      <td>expense_test.dart</td>
+      <td>Search expense by name</td>
+      <td>Kiểm tra tìm kiếm chi tiêu theo tên</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>131</td>
+      <td>expense_test.dart</td>
+      <td>Handle recurring expenses</td>
+      <td>Kiểm tra xử lý chi tiêu lặp lại</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>132</td>
+      <td>income_test.dart</td>
+      <td>Add new income</td>
+      <td>Kiểm tra thêm thu nhập mới</td>
+      <td>Integration</td>
+      <td><span class="priority priority-high">High</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>133</td>
+      <td>income_test.dart</td>
+      <td>View income list</td>
+      <td>Kiểm tra xem danh sách thu nhập</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>134</td>
+      <td>income_test.dart</td>
+      <td>Edit income details</td>
+      <td>Kiểm tra chỉnh sửa thu nhập</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+        <tr>
+      <td>135</td>
+      <td>income_test.dart</td>
+      <td>Handle recurring income</td>
+      <td>Kiểm tra xử lý thu nhập lặp lại</td>
+      <td>Integration</td>
+      <td><span class="priority priority-medium">Medium</span></td>
+      <td><span class="status">PASS</span></td>
+    </tr>
+    
+        </tbody>
+      </table>
+    </section>
+    
+    <footer>
+      Generated on 2025-12-22 11:34:05 | Flutter Finance App Test Report
+    </footer>
+  </div>
+</body>
+</html>
