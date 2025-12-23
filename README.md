@@ -71,8 +71,6 @@ Cài đặt thư viện:
 
 flutter pub get
 
-Chạy ứng dụng:
-
 flutter run
 
 Cấu trúc dự án
