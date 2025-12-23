@@ -55,6 +55,8 @@ Flutter – Framework UI
 
 Hive – Cơ sở dữ liệu nội bộ
 
+Firebase - Lưu trữ phục vụ backup và restore
+
 Provider – Quản lý trạng thái
 
 Local Notifications – Thông báo nội bộ
