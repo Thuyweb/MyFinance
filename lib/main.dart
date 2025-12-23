@@ -17,16 +17,6 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ĐĂNG KÝ LICENSE Ở ĐÂY
-  LicenseRegistry.addLicense(() async* {
-    final text = await rootBundle.loadString(
-      'assets/licenses/my_finance.txt',
-    );
-    yield LicenseEntryWithLineBreaks(
-      ['My Finance'],
-      text,
-    );
-  });
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
